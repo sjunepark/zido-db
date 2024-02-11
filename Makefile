@@ -1,9 +1,14 @@
 .PHONY: run check
 
-run:
+run-vector:
 	go clean
-	go build -o bin/main cmd/main.go
-	./bin/main
+	go build -o bin/vector cmd/vector/main.go
+	./bin/vector
+
+run-location:
+	go clean
+	go build -o bin/location cmd/location/main.go
+	./bin/location
 
 check:
 	go fmt ./...
