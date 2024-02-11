@@ -1,4 +1,4 @@
-package gisprocessor
+package vectorprocessor
 
 import (
 	"github.com/sjunepark/go-gis/internal/fileprocessor"
@@ -21,7 +21,7 @@ func Shp2Geojson(shp ShpFile) (outputPath string) {
 		return ""
 	}
 
-	cmd := exec.Command("shp2json", shp.AbsPath(), "--crs-name", "EPSG:5179", "--encoding", "EUC-KR", "-o", geojsonPath)
+	cmd := exec.Command("ogr2ogr", "-f", "GeoJSON", "-t_srs", "EPSG:4326", geojsonPath, shp.AbsPath(), "-s_srs", "EPSG:5179")
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
