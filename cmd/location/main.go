@@ -1,4 +1,4 @@
-package location
+package main
 
 func main() {
 	println("Hello, World!")
