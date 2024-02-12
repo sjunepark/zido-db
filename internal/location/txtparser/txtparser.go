@@ -11,19 +11,7 @@ import (
 	"time"
 )
 
-func ReadTxtAndSaveToDb(filepath string, baseDate time.Time) error {
-	locations, err := parseTxt(filepath, baseDate)
-	if err != nil {
-		return err
-	}
-	err = persistToDb(locations)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func parseTxt(filepath string, baseDate time.Time) ([]types.Location, error) {
+func ParseTxt(filepath string, baseDate time.Time) ([]types.Location, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		panic(err)
@@ -58,11 +46,6 @@ func parseTxt(filepath string, baseDate time.Time) ([]types.Location, error) {
 	}
 
 	return locations, nil
-}
-
-func persistToDb(locations []types.Location) error {
-	// Add logic to persist to db, in a single transaction.
-	return nil
 }
 
 func fieldsToLocation(fields []string, baseDate time.Time) (types.Location, error) {
