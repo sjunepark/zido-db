@@ -68,6 +68,7 @@ func fieldsToLocation(fields []string, baseDate time.Time) (types.Location, erro
 		fields[15], // 관할행정동
 		fields[16], // X좌표
 		fields[17], // Y좌표
+		"EPSG:5179",
 		baseDate,
 	)
 	if err != nil {

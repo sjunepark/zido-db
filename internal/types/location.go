@@ -17,8 +17,6 @@ type LocationDbRecord struct {
 	BuildingUseCategory string `validate:"max=100"`
 	BuildingGroupFlag   string `validate:"len=1"`
 	JurisdictionHJD     string `validate:"max=8"`
-	X                   float64
-	Y                   float64
 }
 
 // Location type is the struct which has relevant fields to persist to the database
@@ -39,12 +37,15 @@ type Location struct {
 	PostalNumber       string  `validate:"required,len=5"`
 	Long               float64 `validate:"max=180,min=-180"`
 	Lat                float64 `validate:"max=90,min=-90"`
+	Crs                string  `validate:"required"`
+	X                  float64
+	Y                  float64
 	ValidPosition      bool
 	BaseDate           time.Time `validate:"required"`
 	DatetimeAdded      time.Time `validate:"required"`
 }
 
-func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y string, baseDate time.Time) (Location, error) {
+func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y, crs string, baseDate time.Time) (Location, error) {
 	datetimeAdded := time.Now()
 
 	// PK: 시군구코드(5) + 읍면동코드(3) + 도로명번호(7) + 지하여부(1) + 건물본번(5) + 건불부번(5)
@@ -67,18 +68,17 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	var lat float64
 	var validPosition bool
 	if floatX != 0 && floatY != 0 {
-		pj, err := proj.NewCRSToCRS("EPSG:5179", "EPSG:4326", nil)
+		pj, err := proj.NewCRSToCRS(crs, "EPSG:4326", nil)
 		if err != nil {
 			panic(err)
 		}
-		coord := proj.NewCoord(floatX, floatY, 0, 0)
+		coord := proj.NewCoord(floatY, floatX, 0, 0) // The api uses lat, long
 		pjCoord, err = pj.Forward(coord)
 		if err != nil {
 			panic(err)
 		}
-		// Be careful with the order of the coordinates
-		long = pjCoord.Y()
 		lat = pjCoord.X()
+		long = pjCoord.Y()
 		validPosition = true
 	} else {
 		long = 0
@@ -103,6 +103,9 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 		PostalNumber:       postalNumber,
 		Long:               long,
 		Lat:                lat,
+		Crs:                crs,
+		X:                  floatX,
+		Y:                  floatY,
 		ValidPosition:      validPosition,
 		BaseDate:           baseDate,
 		DatetimeAdded:      datetimeAdded,
@@ -119,8 +122,6 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 		BuildingUseCategory: buildingUseCategory,
 		BuildingGroupFlag:   buildingGroupFlag,
 		JurisdictionHJD:     jurisdictionHJD,
-		X:                   floatX,
-		Y:                   floatY,
 	}
 
 	err = validation.ValidateStruct(locationDbRecord)
