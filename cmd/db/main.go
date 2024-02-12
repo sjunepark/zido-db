@@ -28,6 +28,10 @@ func main() {
 				panic(err)
 			}
 		}(connector)
-
 	}
+
+	database.CreateUserTable(tursoDB)
+	database.InsertUser(tursoDB, "sjunepark", "password", "junepark202012@gmail.com")
+	database.SelectUsers(tursoDB)
+
 }
