@@ -4,18 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/sjunepark/go-gis/internal/types"
-	"github.com/sjunepark/go-gis/internal/validation"
 	"golang.org/x/text/encoding/korean"
 	"golang.org/x/text/transform"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
 
-func ReadTxtAndSaveToDb() error {
-	// todo: fix path
-	locations, err := processTxt("data/input/location_202401/entrc_sejong.txt")
+func ReadTxtAndSaveToDb(filepath string, baseDate time.Time) error {
+	locations, err := parseTxt(filepath, baseDate)
 	if err != nil {
 		return err
 	}
@@ -26,7 +23,7 @@ func ReadTxtAndSaveToDb() error {
 	return nil
 }
 
-func processTxt(filepath string) ([]types.Location, error) {
+func parseTxt(filepath string, baseDate time.Time) ([]types.Location, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		panic(err)
@@ -52,12 +49,11 @@ func processTxt(filepath string) ([]types.Location, error) {
 			continue
 		}
 
-		locationDBRecord, err := fieldsToLocationDBRecord(fields, time.Date(2024, 1, 1, 0, 0, 0, 0, time.FixedZone("KST", 9*60*60)))
+		location, err := fieldsToLocation(fields, baseDate)
 		if err != nil {
 			fmt.Printf("Error processing line: %s. Error: %s\n", getLineSnippet(line), err)
 			continue
 		}
-		location := locationDBRecord.ToLocation()
 		locations = append(locations, location)
 	}
 
@@ -69,48 +65,33 @@ func persistToDb(locations []types.Location) error {
 	return nil
 }
 
-func fieldsToLocationDBRecord(fields []string, baseDatetime time.Time) (types.LocationDbRecord, error) {
-	var locationDBRecord types.LocationDbRecord
-	var err error
-	locationDBRecord.SGGNumber = fields[0]
-	locationDBRecord.EntranceNumber = fields[1]
-	locationDBRecord.BJDNumber = fields[2]
-	locationDBRecord.SDName = fields[3]
-	locationDBRecord.SGGName = fields[4]
-	locationDBRecord.EMDName = fields[5]
-	locationDBRecord.RoadNumber = fields[6]
-	locationDBRecord.RoadName = fields[7]
-	locationDBRecord.UndergroundFlag = fields[8]
-	locationDBRecord.BuildingMainNumber, err = strconv.Atoi(fields[9])
+func fieldsToLocation(fields []string, baseDate time.Time) (types.Location, error) {
+	location, err := types.NewLocation(
+		fields[0],  // 시군구코드
+		fields[1],  // 입구번호
+		fields[2],  // 법정동코드
+		fields[3],  // 시도명
+		fields[4],  // 시군구명
+		fields[5],  // 읍면동명
+		fields[6],  // 도로명코드(시군구코드(5) + 도로명번호(7))
+		fields[7],  // 도로명
+		fields[8],  // 지하여부
+		fields[9],  // 건물본번
+		fields[10], // 건물부번
+		fields[11], // 건물명
+		fields[12], // 우편번호
+		fields[13], // 건물용도
+		fields[14], // 건물구분
+		fields[15], // 관할행정동
+		fields[16], // X좌표
+		fields[17], // Y좌표
+		baseDate,
+	)
 	if err != nil {
-		locationDBRecord.BuildingMainNumber = 0
-	}
-	locationDBRecord.BuildingSubNumber, err = strconv.Atoi(fields[10])
-	if err != nil {
-		locationDBRecord.BuildingSubNumber = 0
-	}
-	locationDBRecord.BuildingName = fields[11]
-	locationDBRecord.PostalNumber = fields[12]
-	locationDBRecord.BuildingUseCategory = fields[13]
-	locationDBRecord.BuildingGroupFlag = fields[14]
-	locationDBRecord.JurisdictionHJD = fields[15]
-	locationDBRecord.X, err = strconv.ParseFloat(fields[16], 64)
-	if err != nil {
-		locationDBRecord.X = 0
-	}
-	locationDBRecord.Y, err = strconv.ParseFloat(fields[17], 64)
-	if err != nil {
-		locationDBRecord.Y = 0
-	}
-	locationDBRecord.BaseDate = baseDatetime
-	locationDBRecord.DatetimeAdded = time.Now()
-
-	err = validation.ValidateStruct(locationDBRecord)
-	if err != nil {
-		return types.LocationDbRecord{}, err
+		return types.Location{}, err
 	}
 
-	return locationDBRecord, nil
+	return location, nil
 }
 
 func getLineSnippet(line string) string {

@@ -13,12 +13,35 @@ import (
 // Id: https://business.juso.go.kr/addrlink/tchnlgyNotice/tchnlgyNoticeDetail.do?currentPage=1&keyword=&searchType=searchType%3D&noticeMgtSn=22899&noticeType=TCHNLGYNOTICE
 type LocationDbRecord struct {
 	Location            Location
-	EntranceNumber      string  `validate:"max=10"`
-	BuildingUseCategory string  `validate:"max=100"`
-	BuildingGroupFlag   string  `validate:"len=1"`
-	JurisdictionHJD     string  `validate:"max=8"`
-	X                   float64 `validate:"required"`
-	Y                   float64 `validate:"required"`
+	EntranceNumber      string `validate:"max=10"`
+	BuildingUseCategory string `validate:"max=100"`
+	BuildingGroupFlag   string `validate:"len=1"`
+	JurisdictionHJD     string `validate:"max=8"`
+	X                   float64
+	Y                   float64
+}
+
+// Location type is the struct which has relevant fields to persist to the database
+type Location struct {
+	Id                 string  `validate:"required,len=26"`
+	BJDNumber          string  `validate:"required,len=10"` // 법정동코드: 시군구코드(5) + 읍면동코드(3) + 00
+	SGGNumber          string  `validate:"required,len=5"`  // 시군구코드
+	EMDNumber          string  `validate:"required,len=3"`
+	RoadNumber         string  `validate:"required,len=7"`
+	UndergroundFlag    string  `validate:"len=1"`
+	BuildingMainNumber string  `validate:"required,max=5"`
+	BuildingSubNumber  string  `validate:"max=5"`
+	SDName             string  `validate:"required,max=40"`
+	SGGName            string  `validate:"max=40"`
+	EMDName            string  `validate:"required,max=40"`
+	RoadName           string  `validate:"required,max=80"`
+	BuildingName       string  `validate:"max=40"`
+	PostalNumber       string  `validate:"required,len=5"`
+	Long               float64 `validate:"max=180,min=-180"`
+	Lat                float64 `validate:"max=90,min=-90"`
+	ValidPosition      bool
+	BaseDate           time.Time `validate:"required"`
+	DatetimeAdded      time.Time `validate:"required"`
 }
 
 func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y string, baseDate time.Time) (Location, error) {
@@ -68,7 +91,7 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 		BJDNumber:          bjdNumber,
 		SGGNumber:          sggNumber,
 		EMDNumber:          bjdNumber[5:8],
-		RoadNumber:         roadNumber,
+		RoadNumber:         roadNumber[5:12],
 		UndergroundFlag:    undergroundFlag,
 		BuildingMainNumber: buildingMainNumber,
 		BuildingSubNumber:  buildingSubNumber,
@@ -106,27 +129,4 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	}
 
 	return location, nil
-}
-
-// Location type is the struct which has relevant fields to persist to the database
-type Location struct {
-	Id                 string    `validate:"required,len=26"`
-	BJDNumber          string    `validate:"required,len=10"` // 법정동코드: 시군구코드(5) + 읍면동코드(3) + 00
-	SGGNumber          string    `validate:"required,len=5"`  // 시군구코드
-	EMDNumber          string    `validate:"required,len=3"`
-	RoadNumber         string    `validate:"required,len=7"`
-	UndergroundFlag    string    `validate:"len=1"`
-	BuildingMainNumber string    `validate:"required,max=5"`
-	BuildingSubNumber  string    `validate:"max=5"`
-	SDName             string    `validate:"required,max=40"`
-	SGGName            string    `validate:"max=40"`
-	EMDName            string    `validate:"required,max=40"`
-	RoadName           string    `validate:"required,max=80"`
-	BuildingName       string    `validate:"max=40"`
-	PostalNumber       string    `validate:"required,len=5"`
-	Long               float64   `validate:"required"`
-	Lat                float64   `validate:"required"`
-	ValidPosition      bool      `validate:"required"`
-	BaseDate           time.Time `validate:"required"`
-	DatetimeAdded      time.Time `validate:"required"`
 }
