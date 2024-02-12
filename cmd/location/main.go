@@ -43,10 +43,8 @@ func main() {
 		panic(err)
 	}
 
-	err = database.PersistToDb(tursoDB, locations)
+	err = database.PersistFirstToDb(tursoDB, locations[0])
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	log.Printf("Successfully persisted %d locations to the database\n", len(locations))
 }

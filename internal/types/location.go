@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"github.com/sjunepark/go-gis/internal/validation"
 	"github.com/twpayne/go-proj/v10"
 	"strconv"
@@ -10,7 +9,6 @@ import (
 
 // LocationDbRecord type is from 위치정보요약DB(https://business.juso.go.kr/addrlink/elctrnMapProvd/geoDBDwldList.do?menu=%EC%9C%84%EC%B9%98%EC%A0%95%EB%B3%B4%EC%9A%94%EC%95%BDDB)
 // X, Y are represented in GRS80 UTM-K, which is EPSG:5179
-// Id: https://business.juso.go.kr/addrlink/tchnlgyNotice/tchnlgyNoticeDetail.do?currentPage=1&keyword=&searchType=searchType%3D&noticeMgtSn=22899&noticeType=TCHNLGYNOTICE
 type LocationDbRecord struct {
 	Location            Location
 	EntranceNumber      string `validate:"max=10"`
@@ -20,15 +18,16 @@ type LocationDbRecord struct {
 }
 
 // Location type is the struct which has relevant fields to persist to the database
+// PK: 시군구코드(5) + 읍면동코드(3) + 도로명번호(7) + 지하여부(1) + 건물본번(5) + 건불부번(5)
+// Id: https://business.juso.go.kr/addrlink/tchnlgyNotice/tchnlgyNoticeDetail.do?currentPage=1&keyword=&searchType=searchType%3D&noticeMgtSn=22899&noticeType=TCHNLGYNOTICE
 type Location struct {
-	Id                 string  `validate:"required,len=26"`
 	BJDNumber          string  `validate:"required,len=10"` // 법정동코드: 시군구코드(5) + 읍면동코드(3) + 00
 	SGGNumber          string  `validate:"required,len=5"`  // 시군구코드
 	EMDNumber          string  `validate:"required,len=3"`
 	RoadNumber         string  `validate:"required,len=7"`
-	UndergroundFlag    string  `validate:"len=1"`
-	BuildingMainNumber string  `validate:"required,max=5"`
-	BuildingSubNumber  string  `validate:"max=5"`
+	UndergroundFlag    int     `validate:"max=2,min=0"`
+	BuildingMainNumber int     `validate:"required,max=99999"`
+	BuildingSubNumber  int     `validate:"max=99999"`
 	SDName             string  `validate:"required,max=40"`
 	SGGName            string  `validate:"max=40"`
 	EMDName            string  `validate:"required,max=40"`
@@ -48,10 +47,17 @@ type Location struct {
 func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y, crs string, baseDate time.Time) (Location, error) {
 	datetimeAdded := time.Now()
 
-	// PK: 시군구코드(5) + 읍면동코드(3) + 도로명번호(7) + 지하여부(1) + 건물본번(5) + 건불부번(5)
-	id := sggNumber + bjdNumber[5:8] + roadNumber[5:12] + undergroundFlag + fmt.Sprintf("%05s", buildingMainNumber) + fmt.Sprintf("%05s", buildingSubNumber)
-	if len(id) != 26 {
-		panic(fmt.Sprintf("ID length is not 26. ID: %s", id))
+	undergroundFlagInt, err := strconv.Atoi(undergroundFlag)
+	if err != nil {
+		undergroundFlagInt = 0
+	}
+	buildingMainNumberInt, err := strconv.Atoi(buildingMainNumber)
+	if err != nil {
+		return Location{}, err
+	}
+	buildingSubNumberInt, err := strconv.Atoi(buildingSubNumber)
+	if err != nil {
+		buildingSubNumberInt = 0
 	}
 
 	floatX, err := strconv.ParseFloat(x, 64)
@@ -87,14 +93,13 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	}
 
 	location := Location{
-		Id:                 id,
 		BJDNumber:          bjdNumber,
 		SGGNumber:          sggNumber,
 		EMDNumber:          bjdNumber[5:8],
 		RoadNumber:         roadNumber[5:12],
-		UndergroundFlag:    undergroundFlag,
-		BuildingMainNumber: buildingMainNumber,
-		BuildingSubNumber:  buildingSubNumber,
+		UndergroundFlag:    undergroundFlagInt,
+		BuildingMainNumber: buildingMainNumberInt,
+		BuildingSubNumber:  buildingSubNumberInt,
 		SDName:             sdName,
 		SGGName:            sggName,
 		EMDName:            emdName,
