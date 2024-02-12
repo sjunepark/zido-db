@@ -1,0 +1,5 @@
+package txtparser
+
+func readTxt() {
+	// ...
+}
