@@ -7,7 +7,6 @@ import (
 )
 
 func InitTursoDB() (*sql.DB, *libsql.Connector) {
-
 	switch os.Getenv("TURSO_ENV") {
 	case "local":
 		dbName := os.Getenv("TURSO_LOCAL_LOCATION_DB_PATH")

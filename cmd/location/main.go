@@ -1,13 +1,39 @@
 package main
 
 import (
+	"database/sql"
+	"github.com/joho/godotenv"
+	"github.com/libsql/go-libsql"
+	"github.com/sjunepark/go-gis/internal/database"
 	"github.com/sjunepark/go-gis/internal/location/txtparser"
 	"github.com/sjunepark/go-gis/internal/validation"
+	"log"
 	"time"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	validation.Init()
+
+	tursoDB, connector := database.InitTursoDB()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(tursoDB)
+	if connector != nil {
+		defer func(connector *libsql.Connector) {
+			err := connector.Close()
+			if err != nil {
+				panic(err)
+			}
+		}(connector)
+	}
 
 	filepath := "data/input/location_202401/entrc_sejong.txt"
 	baseDate := time.Date(2024, 1, 1, 0, 0, 0, 0, time.FixedZone("KST", 9*60*60))
@@ -17,5 +43,10 @@ func main() {
 		panic(err)
 	}
 
-	println("Parsed locations: ", len(locations))
+	err = database.PersistToDb(tursoDB, locations)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Printf("Successfully persisted %d locations to the database\n", len(locations))
 }

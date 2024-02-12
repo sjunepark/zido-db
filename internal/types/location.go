@@ -40,7 +40,7 @@ type Location struct {
 	Crs                string  `validate:"required"`
 	X                  float64
 	Y                  float64
-	ValidPosition      bool
+	ValidPosition      int       `validate:"max=1,min=0"`
 	BaseDate           time.Time `validate:"required"`
 	DatetimeAdded      time.Time `validate:"required"`
 }
@@ -49,7 +49,7 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	datetimeAdded := time.Now()
 
 	// PK: 시군구코드(5) + 읍면동코드(3) + 도로명번호(7) + 지하여부(1) + 건물본번(5) + 건불부번(5)
-	id := sggNumber + bjdNumber[5:8] + roadNumber[5:12] + undergroundFlag + fmt.Sprintf("%05s", buildingMainNumber) + fmt.Sprintf("%5s", buildingSubNumber)
+	id := sggNumber + bjdNumber[5:8] + roadNumber[5:12] + undergroundFlag + fmt.Sprintf("%05s", buildingMainNumber) + fmt.Sprintf("%05s", buildingSubNumber)
 	if len(id) != 26 {
 		panic(fmt.Sprintf("ID length is not 26. ID: %s", id))
 	}
@@ -66,24 +66,24 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	var pjCoord proj.Coord
 	var long float64
 	var lat float64
-	var validPosition bool
+	var validPosition int
 	if floatX != 0 && floatY != 0 {
 		pj, err := proj.NewCRSToCRS(crs, "EPSG:4326", nil)
 		if err != nil {
 			panic(err)
 		}
-		coord := proj.NewCoord(floatY, floatX, 0, 0) // The api uses lat, long
+		coord := proj.NewCoord(floatY, floatX, 0, 0) // The api uses lat, long, which is the opposite
 		pjCoord, err = pj.Forward(coord)
 		if err != nil {
 			panic(err)
 		}
-		lat = pjCoord.X()
 		long = pjCoord.Y()
-		validPosition = true
+		lat = pjCoord.X()
+		validPosition = 1
 	} else {
 		long = 0
 		lat = 0
-		validPosition = false
+		validPosition = 0
 	}
 
 	location := Location{
