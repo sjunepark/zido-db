@@ -8,11 +8,11 @@ import (
 	"time"
 )
 
-// AddressDbRecord type is from 위치정보요약DB(https://business.juso.go.kr/addrlink/elctrnMapProvd/geoDBDwldList.do?menu=%EC%9C%84%EC%B9%98%EC%A0%95%EB%B3%B4%EC%9A%94%EC%95%BDDB)
+// LocationDbRecord type is from 위치정보요약DB(https://business.juso.go.kr/addrlink/elctrnMapProvd/geoDBDwldList.do?menu=%EC%9C%84%EC%B9%98%EC%A0%95%EB%B3%B4%EC%9A%94%EC%95%BDDB)
 // X, Y are represented in GRS80 UTM-K, which is EPSG:5179
 // Id: https://business.juso.go.kr/addrlink/tchnlgyNotice/tchnlgyNoticeDetail.do?currentPage=1&keyword=&searchType=searchType%3D&noticeMgtSn=22899&noticeType=TCHNLGYNOTICE
-type AddressDbRecord struct {
-	Address             Address
+type LocationDbRecord struct {
+	Location            Location
 	EntranceNumber      string  `validate:"max=10"`
 	BuildingUseCategory string  `validate:"max=100"`
 	BuildingGroupFlag   string  `validate:"len=1"`
@@ -21,7 +21,7 @@ type AddressDbRecord struct {
 	Y                   float64 `validate:"required"`
 }
 
-func NewAddress(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y string, baseDate time.Time) (Address, error) {
+func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y string, baseDate time.Time) (Location, error) {
 	datetimeAdded := time.Now()
 
 	// PK: 시군구코드(5) + 읍면동코드(3) + 도로명번호(7) + 지하여부(1) + 건물본번(5) + 건불부번(5)
@@ -63,7 +63,7 @@ func NewAddress(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, 
 		validPosition = false
 	}
 
-	address := Address{
+	location := Location{
 		Id:                 id,
 		BJDNumber:          bjdNumber,
 		SGGNumber:          sggNumber,
@@ -85,13 +85,13 @@ func NewAddress(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, 
 		DatetimeAdded:      datetimeAdded,
 	}
 
-	err = validation.ValidateStruct(address)
+	err = validation.ValidateStruct(location)
 	if err != nil {
 		panic(err)
 	}
 
-	addressDbRecord := AddressDbRecord{
-		Address:             address,
+	locationDbRecord := LocationDbRecord{
+		Location:            location,
 		EntranceNumber:      entranceNumber,
 		BuildingUseCategory: buildingUseCategory,
 		BuildingGroupFlag:   buildingGroupFlag,
@@ -100,16 +100,16 @@ func NewAddress(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, 
 		Y:                   floatY,
 	}
 
-	err = validation.ValidateStruct(addressDbRecord)
+	err = validation.ValidateStruct(locationDbRecord)
 	if err != nil {
 		panic(err)
 	}
 
-	return address, nil
+	return location, nil
 }
 
-// Address type is the struct which has relevant fields to persist to the database
-type Address struct {
+// Location type is the struct which has relevant fields to persist to the database
+type Location struct {
 	Id                 string    `validate:"required,len=26"`
 	BJDNumber          string    `validate:"required,len=10"` // 법정동코드: 시군구코드(5) + 읍면동코드(3) + 00
 	SGGNumber          string    `validate:"required,len=5"`  // 시군구코드
