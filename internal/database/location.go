@@ -106,3 +106,7 @@ func PersistFirstToDb(db *sql.DB, l types.Location) error {
 	log.Printf("ID = %d, affected = %d\n", lastID, rowCnt)
 	return nil
 }
+
+func batchInsert(db *sql.DB, locations []types.Location) error {
+	db.B
+} // Start a transaction
