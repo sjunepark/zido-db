@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"github.com/libsql/go-libsql"
 	"os"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func InitTursoDB() (*sql.DB, *libsql.Connector) {

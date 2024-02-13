@@ -7,9 +7,8 @@ import (
 	"time"
 )
 
-// LocationDbRecord type is from 위치정보요약DB(https://business.juso.go.kr/addrlink/elctrnMapProvd/geoDBDwldList.do?menu=%EC%9C%84%EC%B9%98%EC%A0%95%EB%B3%B4%EC%9A%94%EC%95%BDDB)
-// X, Y are represented in GRS80 UTM-K, which is EPSG:5179
-type LocationDbRecord struct {
+// LocationDbRec type is from 위치정보요약DB(https://business.juso.go.kr/addrlink/elctrnMapProvd/geoDBDwldList.do?menu=%EC%9C%84%EC%B9%98%EC%A0%95%EB%B3%B4%EC%9A%94%EC%95%BDDB)
+type LocationDbRec struct {
 	Location            Location
 	EntranceNumber      string `validate:"max=10"`
 	BuildingUseCategory string `validate:"max=100"`
@@ -19,15 +18,16 @@ type LocationDbRecord struct {
 
 // Location type is the struct which has relevant fields to persist to the database
 // PK: 시군구코드(5) + 읍면동코드(3) + 도로명번호(7) + 지하여부(1) + 건물본번(5) + 건불부번(5)
-// Id: https://business.juso.go.kr/addrlink/tchnlgyNotice/tchnlgyNoticeDetail.do?currentPage=1&keyword=&searchType=searchType%3D&noticeMgtSn=22899&noticeType=TCHNLGYNOTICE
+// https://business.juso.go.kr/addrlink/tchnlgyNotice/tchnlgyNoticeDetail.do?currentPage=1&keyword=&searchType=searchType%3D&noticeMgtSn=22899&noticeType=TCHNLGYNOTICE
+// X, Y are represented in GRS80 UTM-K, which is EPSG:5179
 type Location struct {
 	BJDNumber          string  `validate:"required,len=10"` // 법정동코드: 시군구코드(5) + 읍면동코드(3) + 00
 	SGGNumber          string  `validate:"required,len=5"`  // 시군구코드
 	EMDNumber          string  `validate:"required,len=3"`
 	RoadNumber         string  `validate:"required,len=7"`
-	UndergroundFlag    int     `validate:"max=2,min=0"`
-	BuildingMainNumber int     `validate:"required,max=99999"`
-	BuildingSubNumber  int     `validate:"max=99999"`
+	UndergroundFlag    int64   `validate:"max=2,min=0"`
+	BuildingMainNumber int64   `validate:"required,max=99999"`
+	BuildingSubNumber  int64   `validate:"max=99999"`
 	SDName             string  `validate:"required,max=40"`
 	SGGName            string  `validate:"max=40"`
 	EMDName            string  `validate:"required,max=40"`
@@ -39,7 +39,7 @@ type Location struct {
 	Crs                string  `validate:"required"`
 	X                  float64
 	Y                  float64
-	ValidPosition      int       `validate:"max=1,min=0"`
+	ValidPosition      int64     `validate:"max=1,min=0"`
 	BaseDate           time.Time `validate:"required"`
 	DatetimeAdded      time.Time `validate:"required"`
 }
@@ -47,15 +47,15 @@ type Location struct {
 func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y, crs string, baseDate time.Time) (Location, error) {
 	datetimeAdded := time.Now()
 
-	undergroundFlagInt, err := strconv.Atoi(undergroundFlag)
+	undergroundFlagInt, err := strconv.ParseInt(undergroundFlag, 10, 64)
 	if err != nil {
 		undergroundFlagInt = 0
 	}
-	buildingMainNumberInt, err := strconv.Atoi(buildingMainNumber)
+	buildingMainNumberInt, err := strconv.ParseInt(buildingMainNumber, 10, 64)
 	if err != nil {
 		return Location{}, err
 	}
-	buildingSubNumberInt, err := strconv.Atoi(buildingSubNumber)
+	buildingSubNumberInt, err := strconv.ParseInt(buildingSubNumber, 10, 64)
 	if err != nil {
 		buildingSubNumberInt = 0
 	}
@@ -72,7 +72,7 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	var pjCoord proj.Coord
 	var long float64
 	var lat float64
-	var validPosition int
+	var validPosition int64
 	if floatX != 0 && floatY != 0 {
 		pj, err := proj.NewCRSToCRS(crs, "EPSG:4326", nil)
 		if err != nil {
@@ -121,7 +121,7 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 		panic(err)
 	}
 
-	locationDbRecord := LocationDbRecord{
+	locationDbRecord := LocationDbRec{
 		Location:            location,
 		EntranceNumber:      entranceNumber,
 		BuildingUseCategory: buildingUseCategory,

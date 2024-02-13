@@ -1,15 +1,16 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"github.com/sjunepark/go-gis/internal/sqlc"
 	"github.com/sjunepark/go-gis/internal/types"
 	"log"
 	"time"
 )
 
-func PersistToDb(db *sql.DB, locations []types.Location) error {
-	// Start a transaction
+func PersistLocations(db *sql.DB, locations []types.Location) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
@@ -74,39 +75,44 @@ func PersistToDb(db *sql.DB, locations []types.Location) error {
 	return nil
 }
 
-// todo: delete after fix
-func PersistFirstToDb(db *sql.DB, l types.Location) error {
-	query := `INSERT INTO locations (
-		BJDNumber, SGGNumber, EMDNumber, RoadNumber, UndergroundFlag, BuildingMainNumber, BuildingSubNumber, 
-		SDName, SGGName, EMDName, RoadName, BuildingName, PostalNumber, Long, Lat, Crs, X, Y, ValidPosition, 
-		BaseDate, DatetimeAdded
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-
-	res, err := db.Exec(
-		query,
-		l.BJDNumber, l.SGGNumber, l.EMDNumber, l.RoadNumber, l.UndergroundFlag,
-		l.BuildingMainNumber, l.BuildingSubNumber, l.SDName, l.SGGName, l.EMDName, l.RoadName,
-		l.BuildingName, l.PostalNumber, l.Long, l.Lat, l.Crs, l.X, l.Y, l.ValidPosition,
-		l.BaseDate.Format(time.RFC3339), l.DatetimeAdded.Format(time.RFC3339),
-	)
-	if err != nil {
-		return fmt.Errorf("failed to insert data: %w", err)
+func PersistLocation(q *sqlc.Queries, ctx context.Context, l types.Location) error {
+	lToInsert := sqlc.InsertLocationParams{
+		BJDNumber:          l.BJDNumber,
+		SGGNumber:          l.SGGNumber,
+		EMDNumber:          l.EMDNumber,
+		RoadNumber:         l.RoadNumber,
+		UndergroundFlag:    l.UndergroundFlag,
+		BuildingMainNumber: l.BuildingMainNumber,
+		BuildingSubNumber:  l.BuildingSubNumber,
+		SDName:             l.SDName,
+		SGGName:            sql.NullString{String: l.SGGName, Valid: true},
+		EMDName:            l.EMDName,
+		RoadName:           l.RoadName,
+		BuildingName:       sql.NullString{String: l.BuildingName, Valid: true},
+		PostalNumber:       l.PostalNumber,
+		Long:               sql.NullFloat64{Float64: l.Long, Valid: true},
+		Lat:                sql.NullFloat64{Float64: l.Lat, Valid: true},
+		Crs:                l.Crs,
+		X:                  sql.NullFloat64{Float64: l.X, Valid: true},
+		Y:                  sql.NullFloat64{Float64: l.Y, Valid: true},
+		ValidPosition:      l.ValidPosition,
+		BaseDate:           l.BaseDate,
+		DatetimeAdded:      l.DatetimeAdded,
 	}
 
-	lastID, err := res.LastInsertId()
+	// bug: there's a bug with turso or go-libsql that database level constraint checks do not emit errors even checks fail
+	res, err := q.InsertLocation(ctx, lToInsert)
 	if err != nil {
-		return fmt.Errorf("failed to get the last inserted ID: %w", err)
+		return fmt.Errorf("failed to insert data: %w", err)
 	}
 	rowCnt, err := res.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("failed to get the number of rows affected: %w", err)
 	}
+	// bug: this is to substitute for the bug mentioned above, about go-libsql not emitting errors when constraint checks do not emit errors
+	if rowCnt == 0 {
+		return fmt.Errorf("the insert resulted in 0 rows affected")
+	}
 
-	// Both returns 0
-	log.Printf("ID = %d, affected = %d\n", lastID, rowCnt)
 	return nil
 }
-
-func batchInsert(db *sql.DB, locations []types.Location) error {
-	db.B
-} // Start a transaction
