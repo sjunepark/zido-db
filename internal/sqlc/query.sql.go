@@ -73,7 +73,7 @@ type InsertLocationParams struct {
 	Crs                string
 	X                  sql.NullFloat64
 	Y                  sql.NullFloat64
-	ValidPosition      int64
+	ValidPosition      bool
 	BaseDate           time.Time
 	DatetimeAdded      time.Time
 }

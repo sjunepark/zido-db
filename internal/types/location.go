@@ -39,7 +39,7 @@ type Location struct {
 	Crs                string  `validate:"required"`
 	X                  float64
 	Y                  float64
-	ValidPosition      int64     `validate:"max=1,min=0"`
+	ValidPosition      bool
 	BaseDate           time.Time `validate:"required"`
 	DatetimeAdded      time.Time `validate:"required"`
 }
@@ -72,7 +72,7 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	var pjCoord proj.Coord
 	var long float64
 	var lat float64
-	var validPosition int64
+	var validPosition bool
 	if floatX != 0 && floatY != 0 {
 		pj, err := proj.NewCRSToCRS(crs, "EPSG:4326", nil)
 		if err != nil {
@@ -85,11 +85,11 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 		}
 		long = pjCoord.Y()
 		lat = pjCoord.X()
-		validPosition = 1
+		validPosition = true
 	} else {
 		long = 0
 		lat = 0
-		validPosition = 0
+		validPosition = false
 	}
 
 	location := Location{

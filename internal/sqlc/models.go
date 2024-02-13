@@ -28,7 +28,7 @@ type Location struct {
 	Crs                string
 	X                  sql.NullFloat64
 	Y                  sql.NullFloat64
-	Validposition      int64
+	Validposition      bool
 	Basedate           time.Time
 	Datetimeadded      time.Time
 }

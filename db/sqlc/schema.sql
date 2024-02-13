@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS locations
     Crs                TEXT     NOT NULL,
     X                  REAL,
     Y                  REAL,
-    ValidPosition      INTEGER NOT NULL CHECK (ValidPosition = 0 OR ValidPosition = 1),
+    ValidPosition      BOOLEAN NOT NULL CHECK (ValidPosition = 0 OR ValidPosition = 1),
     BaseDate           DATETIME NOT NULL,
     DatetimeAdded      DATETIME NOT NULL,
     PRIMARY KEY (SGGNumber, EMDNumber, RoadNumber, UndergroundFlag, BuildingMainNumber, BuildingSubNumber)
