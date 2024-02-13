@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS locations
 (
     BJDNumber          TEXT     NOT NULL CHECK (length(BJDNumber) = 10),
     SGGNumber          TEXT     NOT NULL CHECK (length(SGGNumber) = 5),
-    EMDNumber          TEXT     NOT NULL CHECK (length(EMDNumber) = 5),
+    EMDNumber          TEXT     NOT NULL CHECK (length(EMDNumber) = 3),
     RoadNumber         TEXT     NOT NULL CHECK (length(RoadNumber) = 7),
     UndergroundFlag    INTEGER  NOT NULL CHECK (UndergroundFlag = 0 OR UndergroundFlag = 1 OR UndergroundFlag = 2),
     BuildingMainNumber INTEGER  NOT NULL CHECK (BuildingMainNumber >= 0 AND BuildingMainNumber <= 99999),
