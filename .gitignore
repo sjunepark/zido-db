@@ -1,6 +1,7 @@
 /data/
 /db/turso/embedded/
 /db/turso/local/
+/pb/pb_data/
 .env
 
 # GOLANG
