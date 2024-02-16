@@ -33,11 +33,7 @@ func ParseTxt(filepath string, baseDate time.Time) ([]types.Location, error) {
 	scanner := bufio.NewScanner(reader)
 
 	var locationCount int
-	var limit int = 1
 	for scanner.Scan() {
-		if locationCount >= limit {
-			break
-		}
 		line := scanner.Text()
 		fields := strings.Split(line, "|")
 		if len(fields) != 18 {
@@ -51,9 +47,6 @@ func ParseTxt(filepath string, baseDate time.Time) ([]types.Location, error) {
 			continue
 		}
 		locations = append(locations, location)
-
-		// todo: delete this line
-		fmt.Printf("Location: %+v\n", location)
 
 		locationCount++
 		if locationCount%1000 == 0 {

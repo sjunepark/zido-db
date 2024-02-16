@@ -1,4 +1,4 @@
-.PHONY: check migrate-up migrate-down migrate-sync all
+.PHONY: check m-up m-down m-sync m-create m-collections pb-serve
 
 all: check
 

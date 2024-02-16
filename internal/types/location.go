@@ -43,6 +43,7 @@ type Location struct {
 	Y                  float64   `db:"y"`
 	ValidPosition      bool      `db:"validPosition"`
 	BaseDate           time.Time `db:"baseDate" validate:"required"`
+	Address            string    `db:"address" validate:"required,max=100"` // 시도 + 시군구 + 읍면동 + 도로명 + 건물본번 + 건물부번
 }
 
 func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y, crs string, baseDate time.Time) (Location, error) {
@@ -103,6 +104,7 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 		Y:                  floatY,
 		ValidPosition:      validPosition,
 		BaseDate:           baseDate,
+		Address:            sdName + " " + sggName + " " + emdName + " " + roadName + " " + getBuildingNumber(buildingMainNumber, buildingSubNumber),
 	}
 
 	err = validation.ValidateStruct(location)
@@ -124,4 +126,11 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	}
 
 	return location, nil
+}
+
+func getBuildingNumber(mainNumber, subNumber string) string {
+	if subNumber != "" && subNumber != "0" {
+		return mainNumber + "-" + subNumber
+	}
+	return mainNumber
 }
