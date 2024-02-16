@@ -10,7 +10,11 @@ import (
 )
 
 func main() {
-	app := pocketbase.New()
+	config := pocketbase.Config{
+		DefaultDataDir: "pb/pb_data",
+	}
+
+	app := pocketbase.NewWithConfig(config)
 
 	err := godotenv.Load()
 	if err != nil {

@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"github.com/sjunepark/go-gis/internal/validation"
 	"github.com/twpayne/go-proj/v10"
 	"strconv"
@@ -21,45 +22,30 @@ type LocationDbRec struct {
 // https://business.juso.go.kr/addrlink/tchnlgyNotice/tchnlgyNoticeDetail.do?currentPage=1&keyword=&searchType=searchType%3D&noticeMgtSn=22899&noticeType=TCHNLGYNOTICE
 // X, Y are represented in GRS80 UTM-K, which is EPSG:5179
 type Location struct {
-	BJDNumber          string  `validate:"required,len=10"` // 법정동코드: 시군구코드(5) + 읍면동코드(3) + 00
-	SGGNumber          string  `validate:"required,len=5"`  // 시군구코드
-	EMDNumber          string  `validate:"required,len=3"`
-	RoadNumber         string  `validate:"required,len=7"`
-	UndergroundFlag    int64   `validate:"max=2,min=0"`
-	BuildingMainNumber int64   `validate:"required,max=99999"`
-	BuildingSubNumber  int64   `validate:"max=99999"`
-	SDName             string  `validate:"required,max=40"`
-	SGGName            string  `validate:"max=40"`
-	EMDName            string  `validate:"required,max=40"`
-	RoadName           string  `validate:"required,max=80"`
-	BuildingName       string  `validate:"max=40"`
-	PostalNumber       string  `validate:"required,len=5"`
-	Long               float64 `validate:"max=180,min=-180"`
-	Lat                float64 `validate:"max=90,min=-90"`
-	Crs                string  `validate:"required"`
-	X                  float64
-	Y                  float64
-	ValidPosition      bool
-	BaseDate           time.Time `validate:"required"`
-	DatetimeAdded      time.Time `validate:"required"`
+	Pk                 string    `db:"pk" validate:"required,len=26"`
+	BJDNumber          string    `db:"bjdNumber" validate:"required,len=10"` // 법정동코드: 시군구코드(5) + 읍면동코드(3) + 00
+	SGGNumber          string    `db:"sggNumber" validate:"required,len=5"`  // 시군구코드
+	EMDNumber          string    `db:"emdNumber" validate:"required,len=3"`  // 읍면동코드
+	RoadNumber         string    `db:"roadNumber" validate:"required,len=7"`
+	UndergroundFlag    string    `db:"undergroundFlag" validate:"required,len=1"`
+	BuildingMainNumber string    `db:"buildingMainNumber" validate:"required,max=5"`
+	BuildingSubNumber  string    `db:"buildingSubNumber" validate:"max=5"`
+	SDName             string    `db:"sdName" validate:"required,max=40"`
+	SGGName            string    `db:"sggName" validate:"max=40"`
+	EMDName            string    `db:"emdName" validate:"required,max=40"`
+	RoadName           string    `db:"roadName" validate:"required,max=80"`
+	BuildingName       string    `db:"buildingName" validate:"max=40"`
+	PostalNumber       string    `db:"postalNumber" validate:"required,len=5"`
+	Long               float64   `db:"long" validate:"max=180,min=-180"`
+	Lat                float64   `db:"lat" validate:"max=90,min=-90"`
+	Crs                string    `db:"crs" validate:"required"`
+	X                  float64   `db:"x"`
+	Y                  float64   `db:"y"`
+	ValidPosition      bool      `db:"validPosition"`
+	BaseDate           time.Time `db:"baseDate" validate:"required"`
 }
 
 func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y, crs string, baseDate time.Time) (Location, error) {
-	datetimeAdded := time.Now()
-
-	undergroundFlagInt, err := strconv.ParseInt(undergroundFlag, 10, 64)
-	if err != nil {
-		undergroundFlagInt = 0
-	}
-	buildingMainNumberInt, err := strconv.ParseInt(buildingMainNumber, 10, 64)
-	if err != nil {
-		return Location{}, err
-	}
-	buildingSubNumberInt, err := strconv.ParseInt(buildingSubNumber, 10, 64)
-	if err != nil {
-		buildingSubNumberInt = 0
-	}
-
 	floatX, err := strconv.ParseFloat(x, 64)
 	if err != nil {
 		floatX = 0
@@ -92,14 +78,18 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 		validPosition = false
 	}
 
+	emdNumber := bjdNumber[5:8]
+	roadNumber = roadNumber[5:12]
+
 	location := Location{
+		Pk:                 sggNumber + emdNumber + roadNumber + undergroundFlag + fmt.Sprintf("%05s", buildingMainNumber) + fmt.Sprintf("%05s", buildingSubNumber),
 		BJDNumber:          bjdNumber,
 		SGGNumber:          sggNumber,
-		EMDNumber:          bjdNumber[5:8],
-		RoadNumber:         roadNumber[5:12],
-		UndergroundFlag:    undergroundFlagInt,
-		BuildingMainNumber: buildingMainNumberInt,
-		BuildingSubNumber:  buildingSubNumberInt,
+		EMDNumber:          emdNumber,
+		RoadNumber:         roadNumber,
+		UndergroundFlag:    undergroundFlag,
+		BuildingMainNumber: buildingMainNumber,
+		BuildingSubNumber:  buildingSubNumber,
 		SDName:             sdName,
 		SGGName:            sggName,
 		EMDName:            emdName,
@@ -113,7 +103,6 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 		Y:                  floatY,
 		ValidPosition:      validPosition,
 		BaseDate:           baseDate,
-		DatetimeAdded:      datetimeAdded,
 	}
 
 	err = validation.ValidateStruct(location)
