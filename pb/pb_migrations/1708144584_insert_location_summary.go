@@ -12,6 +12,7 @@ func init() {
 
 	m.Register(func(db dbx.Builder) error {
 		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 		rowChan := make(chan LocationSummary)
 		errChan := make(chan error, 1)
 		var wg sync.WaitGroup
@@ -90,14 +91,16 @@ func init() {
 					}
 					count++
 					if count%1000000 == 0 {
-						log.Printf("Inserted %d rows into location_summary table\n", count)
+						log.Printf("Inserted %d rows into locations_summary table\n", count)
 					}
 				}
 			}
-			log.Printf("Inserted %d rows into location_summary table\n", count)
+			log.Printf("Inserted %d rows into locations_summary table\n", count)
 		}()
 
 		wg.Wait()
+		close(errChan)
+
 		select {
 		case err := <-errChan:
 			return err
@@ -106,7 +109,7 @@ func init() {
 		}
 	}, func(db dbx.Builder) error {
 		//goland:noinspection SqlResolve,SqlWithoutWhere
-		q := db.NewQuery("DELETE FROM location_summary")
+		q := db.NewQuery("DELETE FROM locations_summary")
 		execute, err := q.Execute()
 		if err != nil {
 			return err
@@ -117,7 +120,7 @@ func init() {
 			return err
 		}
 
-		log.Printf("Deleted %d rows from location_summary table\n", rowsAffected)
+		log.Printf("Deleted %d rows from locations_summary table\n", rowsAffected)
 		return nil
 	})
 }
@@ -136,5 +139,5 @@ type LocationSummary struct {
 }
 
 func (ls LocationSummary) TableName() string {
-	return "location_summary"
+	return "locations_summary"
 }

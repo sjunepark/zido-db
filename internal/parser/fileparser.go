@@ -21,8 +21,8 @@ func ParseFiles(files []string, gobDir string, noOfGoroutines int) {
 
 		go func(file string) {
 			defer wg.Done()
+			defer func() { <-semaphore }()
 			parseFile(gobDir, file)
-			<-semaphore
 		}(file)
 	}
 

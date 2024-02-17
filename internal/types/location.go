@@ -47,6 +47,10 @@ type Location struct {
 	Address            string    `db:"address" validate:"required,max=100"` // 시도 + 시군구 + 읍면동 + 도로명 + 건물본번 + 건물부번
 }
 
+func (l Location) TableName() string {
+	return "locations"
+}
+
 func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y, crs string, baseDate time.Time) (Location, error) {
 	floatX, err := strconv.ParseFloat(x, 64)
 	if err != nil {

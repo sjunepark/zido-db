@@ -12,7 +12,7 @@ import (
 func init() {
 	m.Register(func(db dbx.Builder) error {
 		collection := &models.Collection{
-			Name: "location_summary",
+			Name: "locations_summary",
 			Type: models.CollectionTypeBase,
 			Schema: schema.NewSchema(
 				&schema.SchemaField{
@@ -65,7 +65,7 @@ func init() {
 				},
 			),
 			Indexes: types.JsonArray[string]{
-				"CREATE UNIQUE INDEX `idx_location_summary_address` ON `location_summary` (`address`)",
+				"CREATE UNIQUE INDEX `idx_locations_summary_address` ON `locations_summary` (`address`)",
 			},
 		}
 
@@ -73,7 +73,7 @@ func init() {
 	}, func(db dbx.Builder) error {
 		dao := daos.New(db)
 
-		collection, err := dao.FindCollectionByNameOrId("location_summary")
+		collection, err := dao.FindCollectionByNameOrId("locations_summary")
 		if err != nil {
 			return err
 		}
