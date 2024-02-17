@@ -1,17 +1,26 @@
 package pb_migrations
 
 import (
+	"context"
 	"github.com/pocketbase/dbx"
 	m "github.com/pocketbase/pocketbase/migrations"
 	"log"
+	"sync"
 )
 
 func init() {
 
-	var locationSummaries []LocationSummary
-
 	m.Register(func(db dbx.Builder) error {
-		q := db.NewQuery(`
+		ctx, cancel := context.WithCancel(context.Background())
+		rowChan := make(chan LocationSummary)
+		errChan := make(chan error, 1)
+		var wg sync.WaitGroup
+
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			q := db.NewQuery(`
 			SELECT
 				(ROW_NUMBER() OVER (ORDER BY address)) AS id,
 				address,
@@ -30,26 +39,71 @@ func init() {
 			GROUP BY
 				address;`)
 
-		err := q.All(&locationSummaries)
-		if err != nil {
-			return err
-		}
-
-		var count int
-		for _, locationSummary := range locationSummaries {
-			err := db.Model(&locationSummary).Insert()
+			rows, err := q.Rows()
 			if err != nil {
-				return err
-			}
-			count++
-			if count%1000000 == 0 {
-				log.Printf("Inserted %d rows into location_summary table\n", count)
+				cancel()
+				select {
+				case errChan <- err:
+				default:
+				}
+				return
 			}
 
+			for rows.Next() {
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					var locationSummary LocationSummary
+					err := rows.ScanStruct(&locationSummary)
+					if err != nil {
+						cancel()
+						select {
+						case errChan <- err:
+						default:
+						}
+						return
+					}
+					rowChan <- locationSummary
+				}
+
+			}
+			close(rowChan)
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			var count int
+			for locationSummary := range rowChan {
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					if err := db.Model(&locationSummary).Insert(); err != nil {
+						cancel()
+						select {
+						case errChan <- err:
+						default:
+						}
+						return
+					}
+					count++
+					if count%1000000 == 0 {
+						log.Printf("Inserted %d rows into location_summary table\n", count)
+					}
+				}
+			}
+			log.Printf("Inserted %d rows into location_summary table\n", count)
+		}()
+
+		wg.Wait()
+		select {
+		case err := <-errChan:
+			return err
+		default:
+			return nil
 		}
-
-		log.Printf("Inserted %d rows into location_summary table\n", count)
-		return nil
 	}, func(db dbx.Builder) error {
 		//goland:noinspection SqlResolve,SqlWithoutWhere
 		q := db.NewQuery("DELETE FROM location_summary")
