@@ -1,4 +1,4 @@
-package txtparser
+package parser
 
 import (
 	"bufio"

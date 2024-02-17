@@ -68,13 +68,17 @@ func RemoveFileIfExists(path string) error {
 	return nil
 }
 
-func GetTxtFiles(dir string) ([]string, error) {
+func GetFilesWithExt(dir, ext string) ([]string, error) {
+	if !strings.HasPrefix(ext, ".") {
+		return nil, errors.New("ext must start with '.'")
+	}
+
 	var files []string
 	err := filepath.WalkDir(dir, func(relPath string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if strings.HasSuffix(relPath, ".txt") {
+		if strings.HasSuffix(relPath, ext) {
 			files = append(files, relPath)
 		}
 		return nil

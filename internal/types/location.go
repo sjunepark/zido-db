@@ -15,7 +15,7 @@ type LocationDbRec struct {
 	EntranceNumber      string `validate:"max=10"`
 	BuildingUseCategory string `validate:"max=100"`
 	BuildingGroupFlag   string `validate:"len=1"`
-	JurisdictionHJD     string `validate:"max=8"`
+	JurisdictionHJD     string
 }
 
 // Location type is the struct which has relevant fields to persist to the database
