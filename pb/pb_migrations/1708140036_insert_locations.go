@@ -39,8 +39,8 @@ func init() {
 
 		return nil
 	}, func(db dbx.Builder) error {
-		//goland:noinspection SqlWithoutWhere
-		q := db.NewQuery("DELETE FROM location")
+		//goland:noinspection SqlWithoutWhere,SqlResolve
+		q := db.NewQuery("DELETE FROM locations")
 		execute, err := q.Execute()
 		if err != nil {
 			return err

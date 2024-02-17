@@ -27,10 +27,10 @@ func init() {
 				sggName,
 				emdName,
 				roadName,
-				AVG(lat) AS avg_lat,
-				AVG(long) AS avg_long,
-				AVG(x) AS avg_x,
-				AVG(y) AS avg_y,
+				AVG(lat) AS lat,
+				AVG(long) AS long,
+				AVG(x) AS x,
+				AVG(y) AS y,
 				GROUP_CONCAT(DISTINCT postalNumber) AS postalNumbers
 			FROM
 				location
@@ -128,10 +128,10 @@ type LocationSummary struct {
 	SggName       string  `db:"sggName"`
 	EmdName       string  `db:"emdName"`
 	RoadName      string  `db:"roadName"`
-	AvgLat        float64 `db:"avg_lat"`
-	AvgLong       float64 `db:"avg_long"`
-	AvgX          float64 `db:"avg_x"`
-	AvgY          float64 `db:"avg_y"`
+	Lat           float64 `db:"lat"`
+	Long          float64 `db:"long"`
+	X             float64 `db:"x"`
+	Y             float64 `db:"y"`
 	PostalNumbers string  `db:"postalNumbers"`
 }
 
