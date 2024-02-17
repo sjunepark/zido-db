@@ -2,13 +2,13 @@ package txtparser
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/sjunepark/go-gis/internal/types"
 	"golang.org/x/text/encoding/korean"
 	"golang.org/x/text/transform"
 	"log"
 	"os"
 	fp "path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -32,24 +32,33 @@ func ParseTxt(filepath string, baseDate time.Time) ([]types.Location, error) {
 
 	scanner := bufio.NewScanner(reader)
 
+	limit, err := strconv.Atoi(os.Getenv("INPUT_LIMIT"))
+	if err != nil {
+		limit = 0
+	}
+	dev := os.Getenv("ENV") == "dev"
+
 	var locationCount int
 	for scanner.Scan() {
+		if dev && limit > 0 && locationCount >= limit {
+			break
+		}
 		line := scanner.Text()
 		fields := strings.Split(line, "|")
 		if len(fields) != 18 {
-			fmt.Printf("Invalid number of fields: expected 18, got %d. Line begins with: %s...\n", len(fields), getLineSnippet(line))
+			log.Printf("Invalid number of fields: expected 18, got %d. Line begins with: %s...\n", len(fields), getLineSnippet(line))
 			continue
 		}
 
 		location, err := fieldsToLocation(fields, baseDate)
 		if err != nil {
-			fmt.Printf("Error processing line: %s. Error: %s\n", getLineSnippet(line), err)
+			log.Printf("Error processing line: %s. Error: %s\n", getLineSnippet(line), err)
 			continue
 		}
 		locations = append(locations, location)
 
 		locationCount++
-		if locationCount%1000 == 0 {
+		if locationCount%10000 == 0 {
 			log.Printf("Number of fields appended to locations for file %s: %d\n", fp.Base(filepath), locationCount)
 		}
 	}

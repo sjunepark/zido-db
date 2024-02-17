@@ -5,6 +5,7 @@ import (
 	"github.com/sjunepark/go-gis/internal/validation"
 	"github.com/twpayne/go-proj/v10"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -82,6 +83,11 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	emdNumber := bjdNumber[5:8]
 	roadNumber = roadNumber[5:12]
 
+	address := buildAddress(sdName, sggName, emdName, roadName, buildingMainNumber, buildingSubNumber)
+	if strings.Contains(address, "  ") {
+		return Location{}, fmt.Errorf("formatted address contains double spaces: %s", address)
+	}
+
 	location := Location{
 		Pk:                 sggNumber + emdNumber + roadNumber + undergroundFlag + fmt.Sprintf("%05s", buildingMainNumber) + fmt.Sprintf("%05s", buildingSubNumber),
 		BJDNumber:          bjdNumber,
@@ -104,7 +110,7 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 		Y:                  floatY,
 		ValidPosition:      validPosition,
 		BaseDate:           baseDate,
-		Address:            sdName + " " + sggName + " " + emdName + " " + roadName + " " + getBuildingNumber(buildingMainNumber, buildingSubNumber),
+		Address:            address,
 	}
 
 	err = validation.ValidateStruct(location)
@@ -128,9 +134,27 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	return location, nil
 }
 
-func getBuildingNumber(mainNumber, subNumber string) string {
-	if subNumber != "" && subNumber != "0" {
-		return mainNumber + "-" + subNumber
+func buildAddress(sdName, sggName, emdName, roadName, buildingMainNumber, buildingSubNumber string) string {
+	var buildingNumber string
+	if buildingSubNumber != "" && buildingSubNumber != "0" {
+		buildingNumber = buildingMainNumber + "-" + buildingSubNumber
+	} else {
+		buildingNumber = buildingMainNumber
 	}
-	return mainNumber
+
+	emName := func() string {
+		if strings.HasSuffix(emdName, "동") {
+			return ""
+		}
+		return emdName
+	}()
+
+	var addressParts []string
+	for _, s := range []string{sdName, sggName, emName, roadName, buildingNumber} {
+		if strings.TrimSpace(s) != "" {
+			addressParts = append(addressParts, s)
+		}
+	}
+
+	return strings.Join(addressParts, " ")
 }

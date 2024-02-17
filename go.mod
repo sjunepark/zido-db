@@ -1,6 +1,6 @@
 module github.com/sjunepark/go-gis
 
-go 1.21.7
+go 1.22
 
 require (
 	github.com/go-playground/validator/v10 v10.18.0

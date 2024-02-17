@@ -29,21 +29,23 @@ func CollectShpFiles(dir string) ([]ShpFile, error) {
 	return files, nil
 }
 
-func GetOutputDirectory(inputPath string) string {
+func GetOutputDirectory(inputPath string) (string, error) {
 	inputDir := filepath.Dir(inputPath)
 	outputDir := strings.Replace(inputDir, "data/input", "data/output", 1)
 	//	Create output directory if not exists
-	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
-		err := os.MkdirAll(outputDir, os.ModePerm)
-		if err != nil {
-			return ""
-		}
+	err := CreateDirIfNotExists(outputDir)
+	if err != nil {
+		return "", err
 	}
-	return outputDir
+	return outputDir, nil
 }
 
 func GetOutputPath(inputPath string, outputExt string) (string, error) {
-	outputDir := GetOutputDirectory(inputPath)
+	outputDir, err := GetOutputDirectory(inputPath)
+	if err != nil {
+		return "", err
+
+	}
 	filenameWithExt := filepath.Base(inputPath)
 	filename := strings.TrimSuffix(filenameWithExt, filepath.Ext(inputPath))
 
@@ -62,6 +64,41 @@ func RemoveFileIfExists(path string) error {
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func GetTxtFiles(dir string) ([]string, error) {
+	var files []string
+	err := filepath.WalkDir(dir, func(relPath string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if strings.HasSuffix(relPath, ".txt") {
+			files = append(files, relPath)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
+}
+
+func CreateDirIfNotExists(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err := os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func RemoveDir(dir string) error {
+	err := os.RemoveAll(dir)
+	if err != nil {
+		return err
 	}
 	return nil
 }

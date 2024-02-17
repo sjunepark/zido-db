@@ -106,7 +106,7 @@ func init() {
 			"updateRule": null,
 			"deleteRule": null,
 			"options": {
-				"query": "SELECT\n    (ROW_NUMBER() OVER (ORDER BY address)) AS id,\n    address,\n    AVG(lat) AS avg_lat,\n    AVG(long) AS avg_long,\n    AVG(x) AS avg_x,\n    AVG(y) AS avg_y,\n    GROUP_CONCAT(DISTINCT postalNumber) AS postalNumbers\nFROM\n    location\nWHERE\n    validPosition = 1\nGROUP BY\n    address;"
+				"query": "SELECT\n    (ROW_NUMBER() OVER (ORDER BY address)) AS id,\n    address,\n    sggName,\n    emdName,\n    roadName,\n    AVG(lat) AS avg_lat,\n    AVG(long) AS avg_long,\n    AVG(x) AS avg_x,\n    AVG(y) AS avg_y,\n    GROUP_CONCAT(DISTINCT postalNumber) AS postalNumbers\nFROM\n    location\nWHERE\n    validPosition = 1\nGROUP BY\n    address;"
 			}
 		}`
 

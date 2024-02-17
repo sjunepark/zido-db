@@ -49,6 +49,6 @@ func CheckForDuplicateAddr(db dbx.Builder) error {
 		log.Fatalf("There are %d duplicate addresses out of %d locations", len(addressCounts), count.Count)
 	}
 
-	println("No duplicate addresses found")
+	log.Printf("No duplicate addresses found out of %d locations", count.Count)
 	return nil
 }
