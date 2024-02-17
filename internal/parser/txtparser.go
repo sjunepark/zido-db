@@ -61,6 +61,7 @@ func ParseTxt(filepath string, baseDate time.Time) ([]types.Location, error) {
 		if locationCount%10000 == 0 {
 			log.Printf("Number of fields appended to locations for file %s: %d\n", fp.Base(filepath), locationCount)
 		}
+		log.Printf("Number of fields appended to locations for file %s: %d\n", fp.Base(filepath), locationCount)
 	}
 
 	return locations, nil
