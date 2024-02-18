@@ -186,6 +186,15 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
+					Name:        "roadNameGroup",
+					Type:        schema.FieldTypeText,
+					Required:    true,
+					Presentable: true,
+					Options: &schema.TextOptions{
+						Max: types.Pointer(100),
+					},
+				},
+				&schema.SchemaField{
 					Name:        "address",
 					Type:        schema.FieldTypeText,
 					Required:    true,

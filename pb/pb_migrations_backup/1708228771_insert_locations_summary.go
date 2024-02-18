@@ -1,4 +1,4 @@
-package pb_migrations
+package pb_migrations_backup
 
 import (
 	"context"
@@ -26,15 +26,12 @@ func init() {
 			SELECT
 				(ROW_NUMBER() OVER (ORDER BY address)) AS id,
 				address,
-				sdName,
-				sggName,
-				emdName,
-				roadName,
+				addressGroup,
+				roadNameGroup,
 				AVG(lat) AS lat,
 				AVG(long) AS long,
 				AVG(x) AS x,
-				AVG(y) AS y,
-				GROUP_CONCAT(DISTINCT postalNumber) AS postalNumbers
+				AVG(y) AS y
 			FROM
 				locations
 			WHERE
@@ -139,14 +136,12 @@ func init() {
 type LocationSummary struct {
 	ID            int     `db:"id"`
 	Address       string  `db:"address"`
-	SggName       string  `db:"sggName"`
-	EmdName       string  `db:"emdName"`
-	RoadName      string  `db:"roadName"`
+	AddressGroup  string  `db:"addressGroup"`
+	RoadNameGroup string  `db:"roadNameGroup"`
 	Lat           float64 `db:"lat"`
 	Long          float64 `db:"long"`
 	X             float64 `db:"x"`
 	Y             float64 `db:"y"`
-	PostalNumbers string  `db:"postalNumbers"`
 }
 
 func (ls LocationSummary) TableName() string {

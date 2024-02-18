@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/sjunepark/go-gis/internal/types"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -104,5 +105,6 @@ func RemoveDir(dir string) error {
 	if err != nil {
 		return err
 	}
+	log.Printf("Removed directory: %s\n", dir)
 	return nil
 }

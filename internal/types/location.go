@@ -49,8 +49,17 @@ type Location struct {
 	Address            string    `db:"address" validate:"required,max=100"`       // 시도 + 시군구 + 읍면 + 도로명 + 건물본번 + 건물부번
 }
 
+// TableName is used to tell dbx the table name corresponding to the struct
+//
+//goland:noinspection GoMixedReceiverTypes
 func (l Location) TableName() string {
 	return "locations"
+}
+
+//goland:noinspection GoMixedReceiverTypes
+func (l *Location) AddGroupInfo() {
+	l.AddressGroup = buildAddressGroup(l.SDName, l.SGGName, l.EMDName)
+	l.RoadNameGroup = buildRoadNameGroup(l.RoadName, l.BuildingMainNumber, l.BuildingSubNumber)
 }
 
 func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y, crs string, baseDate time.Time) (Location, error) {

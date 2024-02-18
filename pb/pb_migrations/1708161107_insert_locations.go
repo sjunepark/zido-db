@@ -14,7 +14,7 @@ import (
 
 func init() {
 	m.Register(func(db dbx.Builder) error {
-		gobDir := "data/gob/location_202401"
+		gobDir := "data/gob/location_202401_fix"
 		err := fileprocessor.CreateDirIfNotExists(gobDir)
 		if err != nil {
 			return err
