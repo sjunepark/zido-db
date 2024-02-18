@@ -29,7 +29,6 @@ func init() {
 					Name:     "bjdNumber",
 					Type:     schema.FieldTypeText,
 					Required: true,
-
 					Options: &schema.TextOptions{
 						Min: types.Pointer(10),
 						Max: types.Pointer(10),
@@ -39,7 +38,6 @@ func init() {
 					Name:     "sggNumber",
 					Type:     schema.FieldTypeText,
 					Required: true,
-
 					Options: &schema.TextOptions{
 						Min: types.Pointer(5),
 						Max: types.Pointer(5),
@@ -49,7 +47,6 @@ func init() {
 					Name:     "emdNumber",
 					Type:     schema.FieldTypeText,
 					Required: true,
-
 					Options: &schema.TextOptions{
 						Min: types.Pointer(3),
 						Max: types.Pointer(3),
@@ -59,7 +56,6 @@ func init() {
 					Name:     "roadNumber",
 					Type:     schema.FieldTypeText,
 					Required: true,
-
 					Options: &schema.TextOptions{
 						Min: types.Pointer(7),
 						Max: types.Pointer(7),
@@ -79,7 +75,6 @@ func init() {
 					Name:     "buildingMainNumber",
 					Type:     schema.FieldTypeText,
 					Required: true,
-
 					Options: &schema.TextOptions{
 						Min: types.Pointer(1),
 						Max: types.Pointer(5),
@@ -88,7 +83,6 @@ func init() {
 				&schema.SchemaField{
 					Name: "buildingSubNumber",
 					Type: schema.FieldTypeText,
-
 					Options: &schema.TextOptions{
 						Min: types.Pointer(1),
 						Max: types.Pointer(5),
@@ -98,7 +92,6 @@ func init() {
 					Name:     "sdName",
 					Type:     schema.FieldTypeText,
 					Required: true,
-
 					Options: &schema.TextOptions{
 						Max: types.Pointer(40),
 					},
@@ -106,7 +99,6 @@ func init() {
 				&schema.SchemaField{
 					Name: "sggName",
 					Type: schema.FieldTypeText,
-
 					Options: &schema.TextOptions{
 						Max: types.Pointer(40),
 					},
@@ -115,7 +107,6 @@ func init() {
 					Name:     "emdName",
 					Type:     schema.FieldTypeText,
 					Required: true,
-
 					Options: &schema.TextOptions{
 						Max: types.Pointer(40),
 					},
@@ -132,7 +123,6 @@ func init() {
 				&schema.SchemaField{
 					Name: "buildingName",
 					Type: schema.FieldTypeText,
-
 					Options: &schema.TextOptions{
 						Max: types.Pointer(40),
 					},
@@ -141,7 +131,6 @@ func init() {
 					Name:     "postalNumber",
 					Type:     schema.FieldTypeText,
 					Required: true,
-
 					Options: &schema.TextOptions{
 						Min: types.Pointer(5),
 						Max: types.Pointer(5),
@@ -150,7 +139,6 @@ func init() {
 				&schema.SchemaField{
 					Name: "long",
 					Type: schema.FieldTypeNumber,
-
 					Options: &schema.NumberOptions{
 						Min:       types.Pointer(-180.0),
 						Max:       types.Pointer(180.0),
@@ -160,7 +148,6 @@ func init() {
 				&schema.SchemaField{
 					Name: "lat",
 					Type: schema.FieldTypeNumber,
-
 					Options: &schema.NumberOptions{
 						Min:       types.Pointer(-90.0),
 						Max:       types.Pointer(90.0),
@@ -190,10 +177,22 @@ func init() {
 					Required: true,
 				},
 				&schema.SchemaField{
+					Name:        "addressGroup",
+					Type:        schema.FieldTypeText,
+					Required:    true,
+					Presentable: true,
+					Options: &schema.TextOptions{
+						Max: types.Pointer(100),
+					},
+				},
+				&schema.SchemaField{
 					Name:        "address",
 					Type:        schema.FieldTypeText,
 					Required:    true,
 					Presentable: true,
+					Options: &schema.TextOptions{
+						Max: types.Pointer(100),
+					},
 				},
 			),
 			Indexes: types.JsonArray[string]{

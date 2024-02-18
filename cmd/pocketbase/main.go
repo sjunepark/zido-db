@@ -4,9 +4,10 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
+	"os"
+
 	_ "github.com/sjunepark/go-gis/pb/pb_migrations"
 	"log"
-	"os"
 )
 
 func main() {

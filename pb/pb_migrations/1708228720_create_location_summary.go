@@ -23,6 +23,23 @@ func init() {
 					Presentable: true,
 				},
 				&schema.SchemaField{
+					Name:        "addressGroup",
+					Type:        schema.FieldTypeText,
+					Required:    true,
+					Presentable: true,
+					Options: &schema.TextOptions{
+						Max: types.Pointer(100),
+					},
+				},
+				&schema.SchemaField{
+					Name:     "sdName",
+					Type:     schema.FieldTypeText,
+					Required: true,
+					Options: &schema.TextOptions{
+						Max: types.Pointer(40),
+					},
+				},
+				&schema.SchemaField{
 					Name:    "sggName",
 					Type:    schema.FieldTypeText,
 					Options: &schema.TextOptions{Max: types.Pointer(40)},

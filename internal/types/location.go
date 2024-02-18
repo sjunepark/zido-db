@@ -44,7 +44,9 @@ type Location struct {
 	Y                  float64   `db:"y"`
 	ValidPosition      bool      `db:"validPosition"`
 	BaseDate           time.Time `db:"baseDate" validate:"required"`
-	Address            string    `db:"address" validate:"required,max=100"` // 시도 + 시군구 + 읍면동 + 도로명 + 건물본번 + 건물부번
+	AddressGroup       string    `db:"addressGroup" validate:"required,max=100"`  // 시도 + 시군구 + 읍면
+	RoadNameGroup      string    `db:"roadNameGroup" validate:"required,max=100"` // 도로명 + 건물본번 + 건물부번
+	Address            string    `db:"address" validate:"required,max=100"`       // 시도 + 시군구 + 읍면 + 도로명 + 건물본번 + 건물부번
 }
 
 func (l Location) TableName() string {
@@ -87,7 +89,12 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	emdNumber := bjdNumber[5:8]
 	roadNumber = roadNumber[5:12]
 
-	address := buildAddress(sdName, sggName, emdName, roadName, buildingMainNumber, buildingSubNumber)
+	addressGroup := buildAddressGroup(sdName, sggName, emdName)
+	roadNameGroup := buildRoadNameGroup(roadName, buildingMainNumber, buildingSubNumber)
+	address, err := buildAddress(addressGroup, roadNameGroup)
+	if err != nil {
+		return Location{}, err
+	}
 	if strings.Contains(address, "  ") {
 		return Location{}, fmt.Errorf("formatted address contains double spaces: %s", address)
 	}
@@ -114,6 +121,8 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 		Y:                  floatY,
 		ValidPosition:      validPosition,
 		BaseDate:           baseDate,
+		AddressGroup:       addressGroup,
+		RoadNameGroup:      roadNameGroup,
 		Address:            address,
 	}
 
@@ -138,14 +147,14 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	return location, nil
 }
 
-func buildAddress(sdName, sggName, emdName, roadName, buildingMainNumber, buildingSubNumber string) string {
-	var buildingNumber string
-	if buildingSubNumber != "" && buildingSubNumber != "0" {
-		buildingNumber = buildingMainNumber + "-" + buildingSubNumber
-	} else {
-		buildingNumber = buildingMainNumber
+func buildAddress(addressGroup, roadNameGroup string) (string, error) {
+	if strings.TrimSpace(roadNameGroup) == "" || strings.TrimSpace(addressGroup) == "" {
+		return "", fmt.Errorf("roadNameGroup and addressGroup must not be empty")
 	}
+	return addressGroup + " " + roadNameGroup, nil
+}
 
+func buildAddressGroup(sdName, sggName, emdName string) string {
 	emName := func() string {
 		if strings.HasSuffix(emdName, "동") {
 			return ""
@@ -154,11 +163,29 @@ func buildAddress(sdName, sggName, emdName, roadName, buildingMainNumber, buildi
 	}()
 
 	var addressParts []string
-	for _, s := range []string{sdName, sggName, emName, roadName, buildingNumber} {
-		if strings.TrimSpace(s) != "" {
-			addressParts = append(addressParts, s)
+	for _, s := range []string{sdName, sggName, emName} {
+		trimmedS := strings.TrimSpace(s)
+		if trimmedS != "" {
+			addressParts = append(addressParts, trimmedS)
 		}
 	}
+	return strings.Join(addressParts, " ")
+}
 
+func buildRoadNameGroup(roadName, buildingMainNumber, buildingSubNumber string) string {
+	var buildingNumber string
+	if buildingSubNumber != "" && buildingSubNumber != "0" {
+		buildingNumber = buildingMainNumber + "-" + buildingSubNumber
+	} else {
+		buildingNumber = buildingMainNumber
+	}
+
+	var addressParts []string
+	for _, s := range []string{roadName, buildingNumber} {
+		trimmedS := strings.TrimSpace(s)
+		if trimmedS != "" {
+			addressParts = append(addressParts, trimmedS)
+		}
+	}
 	return strings.Join(addressParts, " ")
 }

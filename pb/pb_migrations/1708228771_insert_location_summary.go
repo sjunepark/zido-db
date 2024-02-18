@@ -20,11 +20,13 @@ func init() {
 		wg.Add(1)
 
 		go func() {
+			log.Println("Running goroutine for inserting scanning rows from locations table")
 			defer wg.Done()
 			q := db.NewQuery(`
 			SELECT
 				(ROW_NUMBER() OVER (ORDER BY address)) AS id,
 				address,
+				sdName,
 				sggName,
 				emdName,
 				roadName,
@@ -34,7 +36,7 @@ func init() {
 				AVG(y) AS y,
 				GROUP_CONCAT(DISTINCT postalNumber) AS postalNumbers
 			FROM
-				location
+				locations
 			WHERE
 				validPosition = 1
 			GROUP BY
@@ -47,12 +49,15 @@ func init() {
 				case errChan <- err:
 				default:
 				}
+				close(rowChan)
 				return
 			}
 
+			var count int
 			for rows.Next() {
 				select {
 				case <-ctx.Done():
+					close(rowChan)
 					return
 				default:
 					var locationSummary LocationSummary
@@ -63,17 +68,23 @@ func init() {
 						case errChan <- err:
 						default:
 						}
+						close(rowChan)
 						return
 					}
 					rowChan <- locationSummary
+					count++
+					if count%100000 == 0 {
+						log.Printf("Scanned %d rows from locations table\n", count)
+					}
 				}
-
 			}
+			log.Printf("Scanned %d rows from locations table\n", count)
 			close(rowChan)
 		}()
 
 		wg.Add(1)
 		go func() {
+			log.Println("Running goroutine for inserting rows into locations_summary table")
 			defer wg.Done()
 			var count int
 			for locationSummary := range rowChan {
@@ -90,7 +101,7 @@ func init() {
 						return
 					}
 					count++
-					if count%1000000 == 0 {
+					if count%100000 == 0 {
 						log.Printf("Inserted %d rows into locations_summary table\n", count)
 					}
 				}
