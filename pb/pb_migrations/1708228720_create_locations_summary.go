@@ -66,7 +66,7 @@ func init() {
 			),
 			Indexes: types.JsonArray[string]{
 				"CREATE UNIQUE INDEX `idx_locations_summary_address` ON `locations_summary` (`address`)",
-				"CREATE INDEX `idx_locations_summary_sdSggEm_addrDetail` ON `locations_summary` (`sdSggEm`, `addrDetail`)",
+				"CREATE INDEX `idx_locations_summary_sdSggEm` ON `locations_summary` (`sdSggEm`)",
 			},
 		}
 

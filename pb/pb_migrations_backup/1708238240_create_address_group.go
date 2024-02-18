@@ -1,4 +1,4 @@
-package pb_migrations
+package pb_migrations_backup
 
 import (
 	"github.com/pocketbase/dbx"
