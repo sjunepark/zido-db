@@ -1,9 +1,10 @@
-package pb_migrations_backup
+package pb_migrations
 
 import (
 	"context"
 	"github.com/pocketbase/dbx"
 	m "github.com/pocketbase/pocketbase/migrations"
+	"github.com/sjunepark/go-gis/internal/types"
 	"log"
 	"sync"
 )
@@ -13,7 +14,7 @@ func init() {
 	m.Register(func(db dbx.Builder) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
-		rowChan := make(chan LocationSummary)
+		rowChan := make(chan types.LocationSummary)
 		errChan := make(chan error, 1)
 		var wg sync.WaitGroup
 
@@ -26,8 +27,8 @@ func init() {
 			SELECT
 				(ROW_NUMBER() OVER (ORDER BY address)) AS id,
 				address,
-				addressGroup,
-				roadNameGroup,
+				sdSggEm,
+				addrDetail,
 				AVG(lat) AS lat,
 				AVG(long) AS long,
 				AVG(x) AS x,
@@ -57,7 +58,7 @@ func init() {
 					close(rowChan)
 					return
 				default:
-					var locationSummary LocationSummary
+					var locationSummary types.LocationSummary
 					err := rows.ScanStruct(&locationSummary)
 					if err != nil {
 						cancel()
@@ -131,19 +132,4 @@ func init() {
 		log.Printf("Deleted %d rows from locations_summary table\n", rowsAffected)
 		return nil
 	})
-}
-
-type LocationSummary struct {
-	ID            int     `db:"id"`
-	Address       string  `db:"address"`
-	AddressGroup  string  `db:"addressGroup"`
-	RoadNameGroup string  `db:"roadNameGroup"`
-	Lat           float64 `db:"lat"`
-	Long          float64 `db:"long"`
-	X             float64 `db:"x"`
-	Y             float64 `db:"y"`
-}
-
-func (ls LocationSummary) TableName() string {
-	return "locations_summary"
 }

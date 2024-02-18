@@ -14,7 +14,7 @@ import (
 
 func init() {
 	m.Register(func(db dbx.Builder) error {
-		gobDir := "data/gob/location_202401_fix"
+		gobDir := "data/gob/location_202401"
 		err := fileprocessor.CreateDirIfNotExists(gobDir)
 		if err != nil {
 			return err
@@ -50,11 +50,14 @@ func init() {
 
 				var count int
 				for _, location := range locations {
+					if location.SdSggEm == "" {
+						continue
+					}
 					select {
 					case <-ctx.Done():
 						return
 					default:
-						err := database.InsertLocation(db, &location)
+						err := database.InsertLocation(db, location)
 						if err != nil {
 							cancel()
 							select {

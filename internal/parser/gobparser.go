@@ -7,13 +7,13 @@ import (
 	"os"
 )
 
-func GetLocations(gobFilePath string) ([]types.Location, error) {
+func GetLocations(gobFilePath string) ([]*types.Location, error) {
 	gobFile, err := os.Open(gobFilePath)
 	if err != nil {
 		return nil, err
 	}
 
-	var locations []types.Location
+	var locations []*types.Location
 	dec := gob.NewDecoder(gobFile)
 	if err := dec.Decode(&locations); err != nil {
 		return nil, err

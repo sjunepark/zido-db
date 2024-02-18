@@ -1,4 +1,4 @@
-package pb_migrations_backup
+package pb_migrations
 
 import (
 	"github.com/pocketbase/dbx"
@@ -7,6 +7,7 @@ import (
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/models/schema"
 	"github.com/pocketbase/pocketbase/tools/types"
+	"log"
 )
 
 func init() {
@@ -16,29 +17,33 @@ func init() {
 			Type: models.CollectionTypeBase,
 			Schema: schema.NewSchema(
 				&schema.SchemaField{
-					Name:        "addressGroup",
+					Name:        "sdSggEm",
 					Type:        schema.FieldTypeText,
 					Required:    true,
 					Presentable: true,
 					Options: &schema.TextOptions{
+						Min: types.Pointer(2),
 						Max: types.Pointer(100),
 					},
 				},
 				&schema.SchemaField{
-					Name:        "roadNameGroup",
+					Name:        "addrDetail",
 					Type:        schema.FieldTypeText,
 					Required:    true,
 					Presentable: true,
 					Options: &schema.TextOptions{
+						Min: types.Pointer(2),
 						Max: types.Pointer(100),
 					},
 				},
 			),
 			Indexes: types.JsonArray[string]{
-				"CREATE UNIQUE INDEX `idx_address_group_addressGroup` ON `locations_summary` (`addressGroup`)",
+				"CREATE INDEX `idx_address_group_sdSggEm` ON `address_group` (`sdSggEm`)",
+				"CREATE INDEX `idx_address_group_addrDetail` ON `locations_summary` (`addrDetail`)",
 			},
 		}
 
+		log.Println("Create collection address_group")
 		return daos.New(db).SaveCollection(collection)
 	}, func(db dbx.Builder) error {
 		dao := daos.New(db)

@@ -177,20 +177,22 @@ func init() {
 					Required: true,
 				},
 				&schema.SchemaField{
-					Name:        "addressGroup",
+					Name:        "sdSggEm",
 					Type:        schema.FieldTypeText,
 					Required:    true,
 					Presentable: true,
 					Options: &schema.TextOptions{
+						Min: types.Pointer(2),
 						Max: types.Pointer(100),
 					},
 				},
 				&schema.SchemaField{
-					Name:        "roadNameGroup",
+					Name:        "addrDetail",
 					Type:        schema.FieldTypeText,
 					Required:    true,
 					Presentable: true,
 					Options: &schema.TextOptions{
+						Min: types.Pointer(2),
 						Max: types.Pointer(100),
 					},
 				},
@@ -200,6 +202,7 @@ func init() {
 					Required:    true,
 					Presentable: true,
 					Options: &schema.TextOptions{
+						Min: types.Pointer(2),
 						Max: types.Pointer(100),
 					},
 				},

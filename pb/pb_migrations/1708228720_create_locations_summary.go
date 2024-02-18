@@ -19,24 +19,29 @@ func init() {
 					Name:        "address",
 					Type:        schema.FieldTypeText,
 					Required:    true,
-					Options:     &schema.TextOptions{Max: types.Pointer(100)},
-					Presentable: true,
-				},
-				&schema.SchemaField{
-					Name:        "addressGroup",
-					Type:        schema.FieldTypeText,
-					Required:    true,
 					Presentable: true,
 					Options: &schema.TextOptions{
+						Min: types.Pointer(2),
 						Max: types.Pointer(100),
 					},
 				},
 				&schema.SchemaField{
-					Name:        "roadNameGroup",
+					Name:        "sdSggEm",
 					Type:        schema.FieldTypeText,
 					Required:    true,
 					Presentable: true,
 					Options: &schema.TextOptions{
+						Min: types.Pointer(2),
+						Max: types.Pointer(100),
+					},
+				},
+				&schema.SchemaField{
+					Name:        "addrDetail",
+					Type:        schema.FieldTypeText,
+					Required:    true,
+					Presentable: true,
+					Options: &schema.TextOptions{
+						Min: types.Pointer(2),
 						Max: types.Pointer(100),
 					},
 				},
@@ -61,7 +66,7 @@ func init() {
 			),
 			Indexes: types.JsonArray[string]{
 				"CREATE UNIQUE INDEX `idx_locations_summary_address` ON `locations_summary` (`address`)",
-				"CREATE INDEX `idx_locations_summary_addressGroup_roadNameGroup` ON `locations_summary` (`addressGroup`, `roadNameGroup`)",
+				"CREATE INDEX `idx_locations_summary_sdSggEm_addrDetail` ON `locations_summary` (`sdSggEm`, `addrDetail`)",
 			},
 		}
 

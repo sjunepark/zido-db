@@ -44,9 +44,9 @@ type Location struct {
 	Y                  float64   `db:"y"`
 	ValidPosition      bool      `db:"validPosition"`
 	BaseDate           time.Time `db:"baseDate" validate:"required"`
-	AddressGroup       string    `db:"addressGroup" validate:"required,max=100"`  // 시도 + 시군구 + 읍면
-	RoadNameGroup      string    `db:"roadNameGroup" validate:"required,max=100"` // 도로명 + 건물본번 + 건물부번
-	Address            string    `db:"address" validate:"required,max=100"`       // 시도 + 시군구 + 읍면 + 도로명 + 건물본번 + 건물부번
+	SdSggEm            string    `db:"sdSggEm" validate:"required,max=100,min=2"`    // 시도 + 시군구 + 읍면
+	AddrDetail         string    `db:"addrDetail" validate:"required,max=100,min=2"` // 도로명 + 건물본번 + 건물부번
+	Address            string    `db:"address" validate:"required,max=100,min=2"`    // 시도 + 시군구 + 읍면 + 도로명 + 건물본번 + 건물부번
 }
 
 // TableName is used to tell dbx the table name corresponding to the struct
@@ -58,8 +58,8 @@ func (l Location) TableName() string {
 
 //goland:noinspection GoMixedReceiverTypes
 func (l *Location) AddGroupInfo() {
-	l.AddressGroup = buildAddressGroup(l.SDName, l.SGGName, l.EMDName)
-	l.RoadNameGroup = buildRoadNameGroup(l.RoadName, l.BuildingMainNumber, l.BuildingSubNumber)
+	l.SdSggEm = buildSdSggEm(l.SDName, l.SGGName, l.EMDName)
+	l.AddrDetail = buildAddrDetail(l.RoadName, l.BuildingMainNumber, l.BuildingSubNumber)
 }
 
 func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName, roadNumber, roadName, undergroundFlag, buildingMainNumber, buildingSubNumber, buildingName, postalNumber, buildingUseCategory, buildingGroupFlag, jurisdictionHJD, x, y, crs string, baseDate time.Time) (Location, error) {
@@ -98,8 +98,8 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 	emdNumber := bjdNumber[5:8]
 	roadNumber = roadNumber[5:12]
 
-	addressGroup := buildAddressGroup(sdName, sggName, emdName)
-	roadNameGroup := buildRoadNameGroup(roadName, buildingMainNumber, buildingSubNumber)
+	addressGroup := buildSdSggEm(sdName, sggName, emdName)
+	roadNameGroup := buildAddrDetail(roadName, buildingMainNumber, buildingSubNumber)
 	address, err := buildAddress(addressGroup, roadNameGroup)
 	if err != nil {
 		return Location{}, err
@@ -130,8 +130,8 @@ func NewLocation(sggNumber, entranceNumber, bjdNumber, sdName, sggName, emdName,
 		Y:                  floatY,
 		ValidPosition:      validPosition,
 		BaseDate:           baseDate,
-		AddressGroup:       addressGroup,
-		RoadNameGroup:      roadNameGroup,
+		SdSggEm:            addressGroup,
+		AddrDetail:         roadNameGroup,
 		Address:            address,
 	}
 
@@ -163,7 +163,7 @@ func buildAddress(addressGroup, roadNameGroup string) (string, error) {
 	return addressGroup + " " + roadNameGroup, nil
 }
 
-func buildAddressGroup(sdName, sggName, emdName string) string {
+func buildSdSggEm(sdName, sggName, emdName string) string {
 	emName := func() string {
 		if strings.HasSuffix(emdName, "동") {
 			return ""
@@ -181,7 +181,7 @@ func buildAddressGroup(sdName, sggName, emdName string) string {
 	return strings.Join(addressParts, " ")
 }
 
-func buildRoadNameGroup(roadName, buildingMainNumber, buildingSubNumber string) string {
+func buildAddrDetail(roadName, buildingMainNumber, buildingSubNumber string) string {
 	var buildingNumber string
 	if buildingSubNumber != "" && buildingSubNumber != "0" {
 		buildingNumber = buildingMainNumber + "-" + buildingSubNumber

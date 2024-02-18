@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	gobFilePath := "data/gob/location_202401_fix/entrc_sejong.gob"
+	gobFilePath := "data/gob/location_202401/entrc_sejong.gob"
 	gobFile, err := os.Open(gobFilePath)
 	if err != nil {
 		panic(err)

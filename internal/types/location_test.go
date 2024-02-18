@@ -43,8 +43,8 @@ func Test_buildAddressGroup_KoreanAddresses(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := buildAddressGroup(tt.args.sdName, tt.args.sggName, tt.args.emdName); got != tt.want {
-				t.Errorf("buildAddressGroup() = %v, want %v", got, tt.want)
+			if got := buildSdSggEm(tt.args.sdName, tt.args.sggName, tt.args.emdName); got != tt.want {
+				t.Errorf("buildSdSggEm() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -91,8 +91,8 @@ func Test_buildRoadNameGroup_KoreanRoads(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := buildRoadNameGroup(tt.args.roadName, tt.args.buildingMainNumber, tt.args.buildingSubNumber); got != tt.want {
-				t.Errorf("buildRoadNameGroup() = %v, want %v", got, tt.want)
+			if got := buildAddrDetail(tt.args.roadName, tt.args.buildingMainNumber, tt.args.buildingSubNumber); got != tt.want {
+				t.Errorf("buildAddrDetail() = %v, want %v", got, tt.want)
 			}
 		})
 	}
