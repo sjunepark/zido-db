@@ -6,7 +6,7 @@ import (
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 	"os"
 
-	_ "github.com/sjunepark/go-gis/pb/pb_migrations"
+	_ "github.com/sjunepark/go-gis/db/pb/pb_migrations"
 	"log"
 )
 
