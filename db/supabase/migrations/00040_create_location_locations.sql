@@ -1,8 +1,19 @@
 -- +goose Up
-
 CREATE SCHEMA location;
 CREATE SCHEMA gis;
 CREATE EXTENSION postgis WITH SCHEMA gis;
+
+CREATE TABLE location.code_name
+(
+    sd_code  CHAR(2)     NOT NULL CHECK (sd_code ~ '^[0-9]{2}$'),
+    sgg_code CHAR(3)     NOT NULL CHECK (sgg_code ~ '^[0-9]{3}$'),
+    emd_code CHAR(3)     NOT NULL CHECK (emd_code ~ '^[0-9]{3}$'),
+    sd_name  VARCHAR(40) NOT NULL CHECK (sd_name = TRIM(sd_name)),
+    sgg_name VARCHAR(40) CHECK (sgg_name = TRIM(sgg_name)),
+    emd_name VARCHAR(40) NOT NULL CHECK (emd_name = TRIM(emd_name)),
+    PRIMARY KEY (sd_code, sgg_code, emd_code)
+);
+
 
 CREATE TABLE location.locations
 (
@@ -28,38 +39,19 @@ CREATE TABLE location.locations
                                                                                                        WHEN building_sub_code IS NOT NULL
                                                                                                            THEN '-' || building_sub_code
                                                                                                        ELSE '' END) STORED,
-
-    UNIQUE (sd_code, sgg_code, emd_code, road_code, building_main_code,
-            building_sub_code)
+    duplicate_flag     BOOLEAN                   NOT NULL DEFAULT FALSE
 );
+
+ALTER TABLE location.locations
+    ADD CONSTRAINT chk_locations_unique_code_name UNIQUE (sd_code, sgg_code, emd_code, road_code, building_main_code,
+                                                          building_sub_code, sd_sgg_em_name, road_building_name);
 
 CREATE INDEX ON location.locations (sd_sgg_em_name);
 
 
-CREATE MATERIALIZED VIEW location.locations_summary AS
-SELECT l.id                                            AS location_id,
-       l.sd_sgg_em_name || ' ' || l.road_building_name AS address,
-       l.location_5179,
-       l.location_4326
-FROM location.locations l
-WITH DATA;
-
-CREATE UNIQUE INDEX ON location.locations_summary (location_id);
-CREATE UNIQUE INDEX ON location.locations_summary (address);
-
 -- +goose Down
 -- +goose StatementBegin
-DROP MATERIALIZED VIEW location.locations_summary;
-
-DO
-$$
-    BEGIN
-        IF (SELECT COUNT(*) FROM location.locations) = 0 THEN
-            DROP TABLE location.locations;
-        END IF;
-    END;
-$$;
-
+DROP TABLE location.locations;
 DROP EXTENSION postgis;
 DROP SCHEMA gis;
 DROP SCHEMA location;
