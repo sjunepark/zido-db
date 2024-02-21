@@ -69,25 +69,24 @@ func RemoveFileIfExists(path string) error {
 	return nil
 }
 
-func GetFilesWithExt(dir, ext string) ([]string, error) {
+func GetFilesWithExt(dirPath, ext string) (filePaths []string, err error) {
 	if !strings.HasPrefix(ext, ".") {
 		return nil, errors.New("ext must start with '.'")
 	}
 
-	var files []string
-	err := filepath.WalkDir(dir, func(relPath string, d fs.DirEntry, err error) error {
+	err = filepath.WalkDir(dirPath, func(relPath string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if strings.HasSuffix(relPath, ext) {
-			files = append(files, relPath)
+			filePaths = append(filePaths, relPath)
 		}
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return files, nil
+	return filePaths, nil
 }
 
 func CreateDirIfNotExists(dir string) error {
