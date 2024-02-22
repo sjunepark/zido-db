@@ -4,7 +4,7 @@ CREATE SCHEMA raw;
 
 CREATE TABLE raw.code_names
 (
-    hjd_code    CHAR(10) PRIMARY KEY CHECK (hjd_code ~ '^[0-9]{10}$'),
+    hjd_code    CHAR(10) PRIMARY KEY CHECK (hjd_code ~ '^[0-9]{8}[0]{2}$'),
     sd_name     VARCHAR(40) NOT NULL CHECK ( sd_name = TRIM(sd_name) ),
     sgg_name    VARCHAR(40) CHECK ( sgg_name = TRIM(sgg_name) ),
     emd_name    VARCHAR(40) CHECK ( emd_name = TRIM(emd_name) ),
