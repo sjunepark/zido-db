@@ -3,8 +3,8 @@
 CREATE MATERIALIZED VIEW location.locations_summary AS
 SELECT l.id                                            AS location_id,
        l.sd_sgg_em_name || ' ' || l.road_building_name AS address,
-       l.location_5179,
-       l.location_4326
+       ST_X(l.location_4326)                           AS longitude,
+       ST_Y(l.location_4326)                           AS latitude
 FROM location.locations l
 WITH DATA;
 

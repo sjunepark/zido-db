@@ -1,4 +1,5 @@
 -- +goose Up
+CREATE SCHEMA location;
 CREATE SCHEMA gis;
 CREATE EXTENSION postgis WITH SCHEMA gis;
 
@@ -16,8 +17,8 @@ CREATE TABLE location.locations
     emd_name           VARCHAR(40)               NOT NULL CHECK (emd_name = TRIM(emd_name)),
     road_name          VARCHAR(40)               NOT NULL CHECK (road_name = TRIM(road_name)),
     building_name      VARCHAR(40) CHECK (building_name = TRIM(building_name)),
-    location_5179      gis.GEOMETRY(POINT, 5179) NOT NULL,
-    location_4326      gis.GEOMETRY(POINT, 4326) NOT NULL,
+    location_5179      gis.GEOMETRY(POINT, 5179) NOT NULL CHECK (gis.ST_IsValid(location_5179)),
+    location_4326      gis.GEOMETRY(POINT, 4326) NOT NULL CHECK (gis.ST_IsValid(location_4326)),
     sd_sgg_em_name     VARCHAR(100) GENERATED ALWAYS AS (sd_name || COALESCE(' ' || sgg_name, '') || CASE
                                                                                                          WHEN RIGHT(emd_name, 1) = '동'
                                                                                                              THEN ''
@@ -29,10 +30,9 @@ CREATE TABLE location.locations
     duplicate_flag     BOOLEAN                   NOT NULL DEFAULT FALSE
 );
 
-ALTER TABLE location.locations
-    ADD CONSTRAINT chk_locations_unique_code_name UNIQUE (sd_code, sgg_code, emd_code, road_code, building_main_code,
-                                                          building_sub_code, sd_sgg_em_name, road_building_name);
-
+CREATE UNIQUE INDEX ON location.locations (sd_code, sgg_code, emd_code, road_code, building_main_code,
+                                           building_sub_code);
+CREATE UNIQUE INDEX ON location.locations (sd_sgg_em_name, road_building_name);
 CREATE INDEX ON location.locations (sd_sgg_em_name);
 
 
@@ -41,4 +41,5 @@ CREATE INDEX ON location.locations (sd_sgg_em_name);
 DROP TABLE location.locations;
 DROP EXTENSION postgis;
 DROP SCHEMA gis;
+DROP SCHEMA location;
 -- +goose StatementEnd
