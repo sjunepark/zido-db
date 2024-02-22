@@ -1,4 +1,5 @@
 -- +goose Up
+CREATE SCHEMA location;
 CREATE SCHEMA gis;
 CREATE EXTENSION postgis WITH SCHEMA gis;
 
@@ -29,10 +30,9 @@ CREATE TABLE location.locations
     duplicate_flag     BOOLEAN                   NOT NULL DEFAULT FALSE
 );
 
-ALTER TABLE location.locations
-    ADD CONSTRAINT chk_locations_unique_code_name UNIQUE (sd_code, sgg_code, emd_code, road_code, building_main_code,
-                                                          building_sub_code, sd_sgg_em_name, road_building_name);
-
+CREATE UNIQUE INDEX ON location.locations (sd_code, sgg_code, emd_code, road_code, building_main_code,
+                                           building_sub_code);
+CREATE UNIQUE INDEX ON location.locations (sd_sgg_em_name, road_building_name);
 CREATE INDEX ON location.locations (sd_sgg_em_name);
 
 
@@ -41,4 +41,5 @@ CREATE INDEX ON location.locations (sd_sgg_em_name);
 DROP TABLE location.locations;
 DROP EXTENSION postgis;
 DROP SCHEMA gis;
+DROP SCHEMA location;
 -- +goose StatementEnd

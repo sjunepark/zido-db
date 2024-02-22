@@ -15,5 +15,8 @@ m-build: check
 m-down:
 	bin/migration-local down
 
+m-up-1:
+	bin/migration-local up-by-one
+
 m-status:
 	bin/migration-local status

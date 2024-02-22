@@ -2,16 +2,6 @@
 
 CREATE SCHEMA raw;
 
-CREATE TABLE raw.code_names
-(
-    hjd_code    CHAR(10) PRIMARY KEY CHECK (hjd_code ~ '^[0-9]{8}[0]{2}$'),
-    sd_name     VARCHAR(40) NOT NULL CHECK ( sd_name = TRIM(sd_name) ),
-    sgg_name    VARCHAR(40) CHECK ( sgg_name = TRIM(sgg_name) ),
-    emd_name    VARCHAR(40) CHECK ( emd_name = TRIM(emd_name) ),
-    create_date CHAR(8) CHECK (create_date ~ '^[0-9]{8}$'),
-    expire_date CHAR(8) CHECK (expire_date ~ '^[0-9]{8}$')
-);
-
 CREATE TABLE raw.locations_summary
 (
     sgg_code_raw          CHAR(5)     NOT NULL CHECK (sgg_code_raw ~ '^[0-9]{5}$'),    -- sd_code(2) + sgg_code(3)
@@ -32,14 +22,14 @@ CREATE TABLE raw.locations_summary
     jurisdiction_hjd      VARCHAR(20),
     x                     REAL,
     y                     REAL,
-    CONSTRAINT pk_primary_key PRIMARY KEY (bjd_code, road_code_raw, underground_flag, building_main_code,
-                                           building_sub_code)
+
+    CONSTRAINT pk_locations_summary PRIMARY KEY (bjd_code, road_code_raw, underground_flag, building_main_code,
+                                                 building_sub_code)
 );
 
 -- +goose Down
 -- +goose StatementBegin
 DROP TABLE raw.locations_summary;
-DROP TABLE raw.code_names;
 
 DROP SCHEMA raw;
 -- +goose StatementEnd
